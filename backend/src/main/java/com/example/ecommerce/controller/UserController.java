@@ -1,5 +1,6 @@
 package com.example.ecommerce.controller;
 
+import com.example.ecommerce.model.User;
 import com.example.ecommerce.repository.CartRepository;
 import com.example.ecommerce.repository.OrderRepository;
 import com.example.ecommerce.repository.UserRepository;
