@@ -1,11 +1,14 @@
 package com.example.ecommerce.controller;
 
 import com.example.ecommerce.model.Product;
+import com.example.ecommerce.repository.CartItemRepository;
+import com.example.ecommerce.repository.OrderItemRepository;
 import com.example.ecommerce.repository.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +20,12 @@ public class ProductController {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CartItemRepository cartItemRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     // READ ALL (public)
     @GetMapping
@@ -58,11 +67,18 @@ public class ProductController {
 
     // DELETE (admin only)
     @PostMapping("/delete/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found for id: " + id));
 
+        // 1. Delete from carts
+        cartItemRepository.deleteByProduct(product);
+
+        // 2. Delete from orders (to avoid FK constraint)
+        orderItemRepository.deleteByProduct(product);
+
+        // 3. Delete the product itself
         productRepository.delete(product);
         return ResponseEntity.ok(Map.of("message", "Product deleted successfully", "id", id));
     }

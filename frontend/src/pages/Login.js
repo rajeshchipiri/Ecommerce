@@ -36,8 +36,9 @@ const Login = () => {
     };
 
     const handleGoogleLogin = () => {
-        // Redirect to Backend OAuth2 endpoint
-        window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+        // Redirect to Backend OAuth2 endpoint using the dynamic API URL
+        const authUrl = api.defaults.baseURL.replace('/api', '');
+        window.location.href = `${authUrl}/oauth2/authorization/google`;
     };
 
     return (

@@ -25,16 +25,16 @@ const ProductCard = ({ product, isAdmin, onEdit, onDelete }) => {
                         <button className="btn-secondary add-to-cart" onClick={() => addToCart(product.id)}>
                             <ShoppingCart size={16} /> Add
                         </button>
-                        {isAdmin && (
-                            <div className="admin-actions">
+                        <div className="product-actions-group">
+                            {isAdmin && (
                                 <button onClick={onEdit} className="btn-icon">
                                     <Edit size={16} />
                                 </button>
-                                <button onClick={onDelete} className="btn-icon btn-danger">
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
-                        )}
+                            )}
+                            <button onClick={onDelete} className="btn-icon btn-danger">
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

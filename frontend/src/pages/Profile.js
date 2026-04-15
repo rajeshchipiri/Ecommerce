@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/api';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, Mail, Lock, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
 
 const Profile = () => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const [profileData, setProfileData] = useState({ email: '' });
     const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
     const [message, setMessage] = useState({ type: '', text: '' });
@@ -48,6 +50,23 @@ const Profile = () => {
         } catch (error) {
             setMessage({ type: 'error', text: error.response?.data || 'Failed to change password.' });
         } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (!window.confirm("Are you sure you want to delete your account? This action is IRREVERSIBLE and will delete all your data including orders and cart.")) {
+            return;
+        }
+
+        setLoading(true);
+        setMessage({ type: '', text: '' });
+        try {
+            await api.delete('/user/me');
+            logout();
+            navigate('/login');
+        } catch (error) {
+            setMessage({ type: 'error', text: 'Failed to delete account. Please try again later.' });
             setLoading(false);
         }
     };
@@ -112,6 +131,18 @@ const Profile = () => {
                         <button type="submit" className="btn-primary" disabled={loading}>Change Password</button>
                     </form>
                 </div>
+            </div>
+
+            <div className="profile-section dangerously-section">
+                <h2><Trash2 size={20} color="#dc3545" /> Danger Zone</h2>
+                <p>Deleting your account is permanent and cannot be undone.</p>
+                <button 
+                    onClick={handleDeleteAccount} 
+                    className="btn-danger-solid" 
+                    disabled={loading}
+                >
+                    Delete My Account
+                </button>
             </div>
 
             {message.text && (

@@ -1,6 +1,7 @@
 package com.example.ecommerce.controller;
 
-import com.example.ecommerce.model.User;
+import com.example.ecommerce.repository.CartRepository;
+import com.example.ecommerce.repository.OrderRepository;
 import com.example.ecommerce.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,12 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -84,5 +92,32 @@ public class UserController {
         userRepository.save(user);
         
         return ResponseEntity.ok("Password changed successfully");
+    }
+
+    @DeleteMapping("/me")
+    @Transactional
+    public ResponseEntity<?> deleteUser() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+            
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // 1. Delete associated orders
+            orderRepository.deleteByUser(user);
+
+            // 2. Delete associated cart
+            cartRepository.deleteByUser(user);
+
+            // 3. Delete the user
+            userRepository.delete(user);
+
+            logger.info("User {} deleted successfully", username);
+            return ResponseEntity.ok("User account and associated data deleted successfully");
+        } catch (Exception e) {
+            logger.error("Error deleting user: ", e);
+            return ResponseEntity.internalServerError().body("Error deleting user: " + e.getMessage());
+        }
     }
 }

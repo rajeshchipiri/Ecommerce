@@ -7,7 +7,12 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUserOrderByCreatedAtDesc(User user);
+
+    @Transactional
+    void deleteByUser(User user);
 }

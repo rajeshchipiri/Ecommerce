@@ -11,7 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -62,15 +62,19 @@ public class WebSecurityConfig {
     @Autowired
     private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
+    @Autowired
+    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Removed for OAuth2 Session State
             .authorizeHttpRequests(auth -> 
                 auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/login/**", "/oauth2/**", "/error").permitAll()
                     .requestMatchers("/api/test/**").permitAll()
                     .requestMatchers("/api/payment/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
@@ -82,6 +86,7 @@ public class WebSecurityConfig {
         // For OAuth2 (Optional but requested)
         http.oauth2Login(oauth2 -> oauth2
             .successHandler(oAuth2AuthenticationSuccessHandler)
+            .failureHandler(oAuth2AuthenticationFailureHandler)
         );
 
 

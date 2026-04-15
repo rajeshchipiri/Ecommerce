@@ -19,6 +19,9 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
     public void sendOrderConfirmation(String toEmail, Order order) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -89,7 +92,7 @@ public class EmailService {
                 + "</div>"
                 + "<div style='padding: 32px; background: white; border: 1px solid #e2e8f0;'>"
                 + "<p>Your account has been created successfully. Start exploring our products and enjoy seamless shopping!</p>"
-                + "<a href='http://localhost:3000/dashboard' style='display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin-top: 16px;'>Start Shopping →</a>"
+                + "<a href='" + frontendUrl + "/dashboard' style='display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin-top: 16px;'>Start Shopping →</a>"
                 + "</div></div>";
 
             helper.setText(html, true);

@@ -37,6 +37,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend.url}")
+    private String frontendUrl;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
@@ -66,7 +69,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         String token = tokenProvider.generateToken(authentication);
 
-        return UriComponentsBuilder.fromUriString("http://localhost:3000/oauth2/redirect")
+        return UriComponentsBuilder.fromUriString(frontendUrl + "/oauth2/redirect")
                 .queryParam("token", token)
                 .build().toUriString();
     }
